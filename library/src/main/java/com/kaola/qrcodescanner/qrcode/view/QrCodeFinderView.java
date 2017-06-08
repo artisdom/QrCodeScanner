@@ -19,6 +19,8 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
@@ -32,8 +34,8 @@ import com.kaola.qrcodescanner.qrcode.utils.ScreenUtils;
  */
 public final class QrCodeFinderView extends RelativeLayout {
 
-    private static final int[] SCANNER_ALPHA = { 0, 64, 128, 192, 255, 192, 128, 64 };
-    private static final long ANIMATION_DELAY = 100L;
+    private static final int[] SCANNER_ALPHA = {0, 64, 128, 192, 255, 192, 128, 64};
+    private static final long ANIMATION_DELAY = 20L;
     private static final int OPAQUE = 0xFF;
 
     private Context mContext;
@@ -80,13 +82,16 @@ public final class QrCodeFinderView extends RelativeLayout {
         }
         // 需要调用下面的方法才会执行onDraw方法
         setWillNotDraw(false);
-        LayoutInflater inflater = LayoutInflater.from(context);
-        RelativeLayout relativeLayout = (RelativeLayout) inflater.inflate(R.layout.layout_qr_code_scanner, this);
-        FrameLayout frameLayout = (FrameLayout) relativeLayout.findViewById(R.id.qr_code_fl_scanner);
+        DisplayMetrics displayMetrics = ScreenUtils.getDisplayMetrics(context);
+        int widthPixels = displayMetrics.widthPixels;
+        int heightPixels = displayMetrics.heightPixels;
+        int wh = (int) ((widthPixels > heightPixels ? heightPixels : widthPixels) * 0.8f);
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(wh, wh);
+        FrameLayout frameLayout = new FrameLayout(context);
+        frameLayout.setLayoutParams(layoutParams);
         mFrameRect = new Rect();
-        RelativeLayout.LayoutParams layoutParams = (LayoutParams) frameLayout.getLayoutParams();
-        mFrameRect.left = (ScreenUtils.getScreenWidth(context) - layoutParams.width) / 2;
-        mFrameRect.top = layoutParams.topMargin;
+        mFrameRect.left = (widthPixels - layoutParams.width) / 2;
+        mFrameRect.top = (int) ((heightPixels - layoutParams.height) / 2 - getResources().getDimension(R.dimen.title_bar_height));
         mFrameRect.right = mFrameRect.left + layoutParams.width;
         mFrameRect.bottom = mFrameRect.top + layoutParams.height;
     }
@@ -121,30 +126,30 @@ public final class QrCodeFinderView extends RelativeLayout {
     }
 
     /**
-     * 画聚焦框，白色的
-     * 
+     * 画聚焦框
+     *
      * @param canvas
      * @param rect
      */
     private void drawFocusRect(Canvas canvas, Rect rect) {
-        // 绘制焦点框（黑色）
+        // 绘制焦点框
         mPaint.setColor(mFrameColor);
         // 上
         canvas.drawRect(rect.left + mAngleLength, rect.top, rect.right - mAngleLength, rect.top + mFocusThick, mPaint);
         // 左
         canvas.drawRect(rect.left, rect.top + mAngleLength, rect.left + mFocusThick, rect.bottom - mAngleLength,
-            mPaint);
+                mPaint);
         // 右
         canvas.drawRect(rect.right - mFocusThick, rect.top + mAngleLength, rect.right, rect.bottom - mAngleLength,
-            mPaint);
+                mPaint);
         // 下
         canvas.drawRect(rect.left + mAngleLength, rect.bottom - mFocusThick, rect.right - mAngleLength, rect.bottom,
-            mPaint);
+                mPaint);
     }
 
     /**
-     * 画粉色的四个角
-     * 
+     * 画四个角
+     *
      * @param canvas
      * @param rect
      */
@@ -185,7 +190,7 @@ public final class QrCodeFinderView extends RelativeLayout {
     }
 
     private void drawLaser(Canvas canvas, Rect rect) {
-        // 绘制焦点框内固定的一条扫描线（红色）
+        // 绘制焦点框内固定的一条扫描线
         mPaint.setColor(mLaserColor);
         mPaint.setAlpha(SCANNER_ALPHA[mScannerAlpha]);
         mScannerAlpha = (mScannerAlpha + 1) % SCANNER_ALPHA.length;

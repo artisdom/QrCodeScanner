@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="qr_code_white">#FFFFFFFF</color>
+    <color name="qr_code_finder_mask">#60000000</color>
+    <color name="qr_code_flash_light_text_color">#FFFFFFFF</color>
+    <color name="qr_code_finder_frame">#6088AE00</color>
+    <color name="qr_code_finder_laser">#FF88AE00</color>
+</resources>

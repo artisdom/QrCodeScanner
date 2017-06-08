@@ -50,16 +50,15 @@ final class DecodeHandler extends Handler {
 
     @Override
     public void handleMessage(Message message) {
-        switch (message.what) {
-            case R.id.decode:
-                decode((byte[]) message.obj, message.arg1, message.arg2);
-                break;
-            case R.id.quit:
-                Looper looper = Looper.myLooper();
-                if (null != looper) {
-                    looper.quit();
-                }
-                break;
+        if (message.what == R.id.qrcode_decode) {
+            decode((byte[]) message.obj, message.arg1, message.arg2);
+
+        } else if (message.what == R.id.qrcode_quit) {
+            Looper looper = Looper.myLooper();
+            if (null != looper) {
+                looper.quit();
+            }
+
         }
     }
 
@@ -104,10 +103,10 @@ final class DecodeHandler extends Handler {
         }
 
         if (rawResult != null) {
-            Message message = Message.obtain(mActivity.getCaptureActivityHandler(), R.id.decode_succeeded, rawResult);
+            Message message = Message.obtain(mActivity.getCaptureActivityHandler(), R.id.qrcode_decode_succeeded, rawResult);
             message.sendToTarget();
         } else {
-            Message message = Message.obtain(mActivity.getCaptureActivityHandler(), R.id.decode_failed);
+            Message message = Message.obtain(mActivity.getCaptureActivityHandler(), R.id.qrcode_decode_failed);
             message.sendToTarget();
         }
     }

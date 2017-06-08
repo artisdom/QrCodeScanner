@@ -17,13 +17,16 @@ public class ScreenUtils {
         throw new AssertionError();
     }
 
+    public static DisplayMetrics getDisplayMetrics(Context context) {
+        return context.getResources().getDisplayMetrics();
+    }
+
     /**
      * 获取屏幕宽度
      *
      * @return
      */
     public static int getScreenWidth(Context context) {
-
         DisplayMetrics dm = context.getResources().getDisplayMetrics();
         return dm.widthPixels;
     }
@@ -35,8 +38,15 @@ public class ScreenUtils {
      */
     public static int getScreenHeight(Context context) {
         DisplayMetrics dm = context.getResources().getDisplayMetrics();
-        int screenHeight = dm.heightPixels;
-        return screenHeight;
+        return dm.heightPixels;
+    }
+
+    /**
+     * dip-->px
+     */
+    public static int dip2Px(Context context, int dip) {
+        float density = context.getResources().getDisplayMetrics().density;
+        return (int) (dip * density + .5f);
     }
 
 }

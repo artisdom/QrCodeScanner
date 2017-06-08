@@ -47,32 +47,29 @@ public final class CaptureActivityHandler extends Handler {
 
     @Override
     public void handleMessage(Message message) {
-        switch (message.what) {
-            case R.id.auto_focus:
-                // Log.d(TAG, "Got auto-focus message");
-                // When one auto focus pass finishes, start another. This is the closest thing to
-                // continuous AF. It does seem to hunt a bit, but I'm not sure what else to do.
-                if (mState == State.PREVIEW) {
-                    CameraManager.get().requestAutoFocus(this, R.id.auto_focus);
-                }
-                break;
-            case R.id.decode_succeeded:
-                Log.e(TAG, "Got decode succeeded message");
-                mState = State.SUCCESS;
-                mActivity.handleDecode((Result) message.obj);
-                break;
-            case R.id.decode_failed:
-                // We're decoding as fast as possible, so when one decode fails, start another.
-                mState = State.PREVIEW;
-                CameraManager.get().requestPreviewFrame(mDecodeThread.getHandler(), R.id.decode);
-                break;
+        if (message.what == R.id.qrcode_auto_focus) {// Log.d(TAG, "Got auto-focus message");
+            // When one auto focus pass finishes, start another. This is the closest thing to
+            // continuous AF. It does seem to hunt a bit, but I'm not sure what else to do.
+            if (mState == State.PREVIEW) {
+                CameraManager.get().requestAutoFocus(this, R.id.qrcode_auto_focus);
+            }
+
+        } else if (message.what == R.id.qrcode_decode_succeeded) {
+            Log.e(TAG, "Got decode succeeded message");
+            mState = State.SUCCESS;
+            mActivity.handleDecode((Result) message.obj);
+
+        } else if (message.what == R.id.qrcode_decode_failed) {// We're decoding as fast as possible, so when one decode fails, start another.
+            mState = State.PREVIEW;
+            CameraManager.get().requestPreviewFrame(mDecodeThread.getHandler(), R.id.qrcode_decode);
+
         }
     }
 
     public void quitSynchronously() {
         mState = State.DONE;
         CameraManager.get().stopPreview();
-        Message quit = Message.obtain(mDecodeThread.getHandler(), R.id.quit);
+        Message quit = Message.obtain(mDecodeThread.getHandler(), R.id.qrcode_quit);
         quit.sendToTarget();
         try {
             mDecodeThread.join();
@@ -81,16 +78,16 @@ public final class CaptureActivityHandler extends Handler {
         }
 
         // Be absolutely sure we don't send any queued up messages
-        removeMessages(R.id.decode_succeeded);
-        removeMessages(R.id.decode_failed);
+        removeMessages(R.id.qrcode_decode_succeeded);
+        removeMessages(R.id.qrcode_decode_failed);
     }
 
     public void restartPreviewAndDecode() {
         if (mState != State.PREVIEW) {
             CameraManager.get().startPreview();
             mState = State.PREVIEW;
-            CameraManager.get().requestPreviewFrame(mDecodeThread.getHandler(), R.id.decode);
-            CameraManager.get().requestAutoFocus(this, R.id.auto_focus);
+            CameraManager.get().requestPreviewFrame(mDecodeThread.getHandler(), R.id.qrcode_decode);
+            CameraManager.get().requestAutoFocus(this, R.id.qrcode_auto_focus);
         }
     }
 

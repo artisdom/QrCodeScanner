@@ -21,6 +21,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,7 +47,6 @@ import java.util.concurrent.Executors;
  * 二维码扫描类。
  */
 public class QrCodeActivity extends Activity implements Callback, OnClickListener {
-
     private static final int REQUEST_SYSTEM_PICTURE = 0;
     private static final int REQUEST_PICTURE = 1;
     public static final int MSG_DECODE_SUCCEED = 1;
@@ -73,21 +73,12 @@ public class QrCodeActivity extends Activity implements Callback, OnClickListene
     private Executor mQrCodeExecutor;
     private Handler mHandler;
 
-    private static Intent createIntent(Context context) {
-        Intent i = new Intent(context, QrCodeActivity.class);
-        return i;
-    }
-
-    public static void launch(Context context) {
-        Intent i = createIntent(context);
-        context.startActivity(i);
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_qr_code);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        setContentView(R.layout.activity_qrcode);
         initView();
         initData();
     }
@@ -295,21 +286,21 @@ public class QrCodeActivity extends Activity implements Callback, OnClickListene
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.qr_code_iv_flash_light:
-                if (mNeedFlashLightOpen) {
-                    turnFlashlightOn();
-                } else {
-                    turnFlashLightOff();
-                }
-                break;
-            case R.id.qr_code_header_black_pic:
-                if (!hasCameraPermission()) {
-                    mDecodeManager.showPermissionDeniedDialog(this);
-                } else {
-                    openSystemAlbum();
-                }
-                break;
+        int i = v.getId();
+        if (i == R.id.qr_code_iv_flash_light) {
+            if (mNeedFlashLightOpen) {
+                turnFlashlightOn();
+            } else {
+                turnFlashLightOff();
+            }
+
+        } else if (i == R.id.qr_code_header_black_pic) {
+            if (!hasCameraPermission()) {
+                mDecodeManager.showPermissionDeniedDialog(this);
+            } else {
+                openSystemAlbum();
+            }
+
         }
     }
 
@@ -326,14 +317,14 @@ public class QrCodeActivity extends Activity implements Callback, OnClickListene
     private void turnFlashlightOn() {
         mNeedFlashLightOpen = false;
         mTvFlashLightText.setText(getString(R.string.qr_code_close_flash_light));
-        mIvFlashLight.setBackgroundResource(R.drawable.flashlight_turn_off);
+        mIvFlashLight.setBackgroundResource(R.drawable.mzw_camera_close);
         CameraManager.get().setFlashLight(true);
     }
 
     private void turnFlashLightOff() {
         mNeedFlashLightOpen = true;
         mTvFlashLightText.setText(getString(R.string.qr_code_open_flash_light));
-        mIvFlashLight.setBackgroundResource(R.drawable.flashlight_turn_on);
+        mIvFlashLight.setBackgroundResource(R.drawable.mzw_camera_open);
         CameraManager.get().setFlashLight(false);
     }
 
